@@ -1,0 +1,37 @@
+services:
+  grafana:
+    image: grafana/grafana-oss:12.3.1
+    container_name: grafana-local
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - /opt/grafana:/var/lib/grafana
+    depends_on:
+      - influxdb
+
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb-local
+    ports:
+      - "8086:8086"
+    volumes:
+      - /opt/influxdb2:/var/lib/influxdb2
+      - /opt/influxdb2-config:/etc/influxdb2
+
+  api:
+    build: ./api
+    container_name: env-api
+    ports:
+      - "8000:8000"
+    environment:
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_ORG=huga
+      - INFLUX_BUCKET=huga
+      - INFLUX_TOKEN=hoge
+      - API_KEY=huga
+    depends_on:
+      - influxdb
